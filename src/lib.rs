@@ -80,7 +80,7 @@ pub struct OpenApi {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub security: Option<SecurityRequirement>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tags: Option<Tag>,
+    pub tags: Option<Vec<Tag>>,
     #[serde(rename = "externalDocs")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub external_docs: Option<ExternalDocs>,

@@ -13,6 +13,9 @@ info:
     url: http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT
 servers:
   - url: http://petstore.swagger.io/api
+tags:
+    - name: Test
+      description: Test description
 paths:
   /pets:
     get:

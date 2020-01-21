@@ -1,25 +1,18 @@
-#[macro_use]
-extern crate error_chain;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_yaml;
-extern crate serde_json;
-extern crate schemafy;
-extern crate regex;
-
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{Read, Write};
-use std::collections::BTreeMap;
 
-use objects::*;
-pub use objects::Schema;
-pub use errors::*;
+use error_chain::bail;
+use serde_derive::{Deserialize, Serialize};
+
+pub use crate::errors::*;
+pub use crate::objects::Schema;
+use crate::objects::*;
 
 pub mod objects;
 
 mod errors {
-    error_chain!{
+    error_chain::error_chain! {
         foreign_links {
             Io(::std::io::Error);
             Yaml(::serde_yaml::Error);
@@ -42,21 +35,19 @@ impl<T> MaybeRef<T> {
     pub fn resolve_ref<'a>(&'a self, map: &'a MapMaybeRef<T>) -> Result<&'a T> {
         match *self {
             MaybeRef::Concrete(ref inner) => Ok(inner),
-            MaybeRef::Ref(ref r) => {
-                match r.ref_.rfind("/") {
-                    None => bail!("Reference {} is not valid path", r.ref_),
-                    Some(loc) => {
-                        let (_, name) = r.ref_.split_at(loc + 1);
-                        match map.get(name) {
-                            Some(&MaybeRef::Concrete(ref inner)) => Ok(inner),
-                            Some(&MaybeRef::Ref(ref ref_)) => {
-                                bail!("Recursive reference {}", ref_.ref_)
-                            }
-                            None => bail!("Reference {} not found", name),
+            MaybeRef::Ref(ref r) => match r.ref_.rfind("/") {
+                None => bail!("Reference {} is not valid path", r.ref_),
+                Some(loc) => {
+                    let (_, name) = r.ref_.split_at(loc + 1);
+                    match map.get(name) {
+                        Some(&MaybeRef::Concrete(ref inner)) => Ok(inner),
+                        Some(&MaybeRef::Ref(ref ref_)) => {
+                            bail!("Recursive reference {}", ref_.ref_)
                         }
+                        None => bail!("Reference {} not found", name),
                     }
                 }
-            }
+            },
         }
     }
 
@@ -125,7 +116,6 @@ impl OpenApi {
         Ok(serde_json::to_string(&self)?)
     }
 }
-
 
 #[cfg(test)]
 mod tests {

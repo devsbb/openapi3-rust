@@ -1,9 +1,11 @@
-pub use serde_yaml::Value as YamlValue;
-pub use schemafy::schema::{Schema, SimpleTypes};
 use schemafy;
+pub use schemafy::schema::{Schema, SimpleTypes};
+use serde_derive::{Deserialize, Serialize};
 use serde_json;
-use Result;
-use {MaybeRef, Map, MapMaybeRef};
+pub use serde_yaml::Value as YamlValue;
+
+use crate::Result;
+use crate::{Map, MapMaybeRef, MaybeRef};
 
 pub trait CodeGen {
     fn generate_code(&self, name: &str) -> Result<String>;
